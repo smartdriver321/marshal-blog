@@ -6,9 +6,9 @@ import { parseWithZod } from '@conform-to/zod'
 
 import prisma from '@/lib/db'
 import { requireUser } from '@/lib/require-user'
-import { siteCreationSchema } from '@/lib/zod-schemas'
+import { postSchema, siteCreationSchema } from '@/lib/zod-schemas'
 
-export async function createSite(prevState: any, formData: FormData) {
+export const createSite = async (prevState: any, formData: FormData) => {
 	const user = await requireUser()
 	const [subStatus, sites] = await Promise.all([
 		prisma.subscription.findUnique({
@@ -92,4 +92,29 @@ export async function createSite(prevState: any, formData: FormData) {
 
 		return redirect('/dashboard/sites')
 	}
+}
+
+export const createArticle = async (prevState: any, formData: FormData) => {
+	const user = await requireUser()
+	const submission = parseWithZod(formData, {
+		schema: postSchema,
+	})
+
+	if (submission.status !== 'success') {
+		return submission.reply()
+	}
+
+	const data = await prisma.post.create({
+		data: {
+			title: submission.value.title,
+			smallDescription: submission.value.smallDescription,
+			slug: submission.value.slug,
+			articleContent: JSON.parse(submission.value.articleContent),
+			image: submission.value.coverImage,
+			userId: user.id,
+			siteId: formData.get('siteId') as string,
+		},
+	})
+
+	return redirect(`/dashboard/sites/${formData.get('siteId')}`)
 }

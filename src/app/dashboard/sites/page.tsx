@@ -16,7 +16,7 @@ import {
 	CardTitle,
 } from '@/components/ui/card'
 
-async function getData(userId: string) {
+const getData = async (userId: string) => {
 	const data = await prisma.site.findMany({
 		where: {
 			userId: userId,

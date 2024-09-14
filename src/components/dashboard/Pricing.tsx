@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Check } from 'lucide-react'
 
+import { createSubscription } from '@/app/actions'
 import { SubmitButton } from '../dashboard/SubmitButtons'
 import { Button } from '@/components/ui/button'
 import {
@@ -98,7 +99,7 @@ export function PricingTable() {
 						</CardContent>
 						<CardFooter>
 							{item.id === 1 ? (
-								<form className='w-full' action=''>
+								<form className='w-full' action={createSubscription}>
 									<SubmitButton text='Buy Plan' className='mt-5 w-full' />
 								</form>
 							) : (

@@ -1,5 +1,7 @@
-import prisma from '@/lib/db'
+import { redirect } from 'next/navigation'
 
+import prisma from '@/lib/db'
+import { stripe } from '@/lib/stripe'
 import { requireUser } from '@/lib/require-user'
 import { SubmitButton } from '@/components/dashboard/SubmitButtons'
 import { PricingTable } from '@/components/dashboard/Pricing'
@@ -35,6 +37,13 @@ export default async function PricingPage() {
 
 	async function createCustomerPortal() {
 		'use server'
+
+		const session = await stripe.billingPortal.sessions.create({
+			customer: data?.User?.customerId as string,
+			return_url: 'http://localhost:3000/dashboard',
+		})
+
+		return redirect(session.url)
 	}
 
 	if (data?.status === 'active') {

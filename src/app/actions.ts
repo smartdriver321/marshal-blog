@@ -7,6 +7,7 @@ import { parseWithZod } from '@conform-to/zod'
 import prisma from '@/lib/db'
 import { requireUser } from '@/lib/require-user'
 import { postSchema, siteCreationSchema } from '@/lib/zod-schemas'
+import { stripe } from '@/lib/stripe'
 
 export const createSite = async (prevState: any, formData: FormData) => {
 	const user = await requireUser()
@@ -147,7 +148,7 @@ export const editArticle = async (prevState: any, formData: FormData) => {
 	return redirect(`/dashboard/sites/${formData.get('siteId')}`)
 }
 
-export async function deleteArticle(formData: FormData) {
+export const deleteArticle = async (formData: FormData) => {
 	const user = await requireUser()
 
 	const data = await prisma.post.delete({
@@ -160,7 +161,7 @@ export async function deleteArticle(formData: FormData) {
 	return redirect(`/dashboard/sites/${formData.get('siteId')}`)
 }
 
-export async function deleteSite(formData: FormData) {
+export const deleteSite = async (formData: FormData) => {
 	const user = await requireUser()
 
 	const data = await prisma.site.delete({
@@ -173,7 +174,7 @@ export async function deleteSite(formData: FormData) {
 	return redirect('/dashboard/sites')
 }
 
-export async function updateImage(formData: FormData) {
+export const updateImage = async (formData: FormData) => {
 	const user = await requireUser()
 
 	const data = await prisma.site.update({
@@ -187,4 +188,51 @@ export async function updateImage(formData: FormData) {
 	})
 
 	return redirect(`/dashboard/sites/${formData.get('siteId')}`)
+}
+
+export const createSubscription = async () => {
+	const user = await requireUser()
+
+	let stripeUserId = await prisma.user.findUnique({
+		where: {
+			id: user.id,
+		},
+		select: {
+			customerId: true,
+			email: true,
+			firstName: true,
+		},
+	})
+
+	if (!stripeUserId?.customerId) {
+		const stripeCustomer = await stripe.customers.create({
+			email: stripeUserId?.email,
+			name: stripeUserId?.firstName,
+		})
+
+		stripeUserId = await prisma.user.update({
+			where: {
+				id: user.id,
+			},
+			data: {
+				customerId: stripeCustomer.id,
+			},
+		})
+	}
+
+	const session = await stripe.checkout.sessions.create({
+		customer: stripeUserId.customerId as string,
+		mode: 'subscription',
+		billing_address_collection: 'auto',
+		payment_method_types: ['card'],
+		line_items: [{ price: process.env.STRIPE_PRICE_ID, quantity: 1 }],
+		customer_update: {
+			address: 'auto',
+			name: 'auto',
+		},
+		success_url: 'http://localhost:3000/dashboard/payment/success',
+		cancel_url: 'http://localhost:3000/dashboard/payment/cancelled',
+	})
+
+	return redirect(session.url as string)
 }

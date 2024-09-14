@@ -180,7 +180,7 @@ export default async function SiteIdPage({
 														<DropdownMenuSeparator />
 														<DropdownMenuItem asChild>
 															<Link
-																href={`/dashboard/sites/${params.siteId}/${item.id}`}
+																href={`/dashboard/sites/${params.siteId}/${item.id}/edit`}
 															>
 																Edit
 															</Link>

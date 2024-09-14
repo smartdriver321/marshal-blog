@@ -146,3 +146,16 @@ export const editArticle = async (prevState: any, formData: FormData) => {
 
 	return redirect(`/dashboard/sites/${formData.get('siteId')}`)
 }
+
+export async function deleteArticle(formData: FormData) {
+	const user = await requireUser()
+
+	const data = await prisma.post.delete({
+		where: {
+			userId: user.id,
+			id: formData.get('articleId') as string,
+		},
+	})
+
+	return redirect(`/dashboard/sites/${formData.get('siteId')}`)
+}

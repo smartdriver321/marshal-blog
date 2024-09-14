@@ -4,6 +4,7 @@ import React from 'react'
 
 import './globals.css'
 import { ThemeProvider } from '@/provider/ThemeProvider'
+import { Toaster } from 'sonner'
 
 const geistSans = localFont({
 	src: './fonts/GeistVF.woff',
@@ -35,7 +36,8 @@ export default function RootLayout({
 					disableTransitionOnChange
 				>
 					{children}
-				</ThemeProvider>{' '}
+					<Toaster richColors closeButton />
+				</ThemeProvider>
 			</body>
 		</html>
 	)

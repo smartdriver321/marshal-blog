@@ -12,6 +12,7 @@ import { toast } from 'sonner'
 
 import { createArticle } from '@/app/actions'
 import { postSchema } from '@/lib/zod-schemas'
+import { UploadDropzone } from '@/lib/uploadthing'
 import { SubmitButton } from '@/components/dashboard/SubmitButtons'
 import TailwindEditor from '@/components/dashboard/TailwindEditor'
 import { Button } from '@/components/ui/button'
@@ -152,7 +153,16 @@ export default function CreateArticlePage({
 									className='object-cover w-[200px] h-[200px] rounded-lg'
 								/>
 							) : (
-								<Button>Upload</Button>
+								<UploadDropzone
+									endpoint='imageUploader'
+									onClientUploadComplete={(res) => {
+										setImageUrl(res[0].url)
+										toast.success('Image has been uploaded')
+									}}
+									onUploadError={() => {
+										toast.error('Something went wrong...')
+									}}
+								/>
 							)}
 
 							<p className='text-red-500 text-sm'>{fields.coverImage.errors}</p>

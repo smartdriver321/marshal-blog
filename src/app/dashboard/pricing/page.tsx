@@ -4,7 +4,6 @@ import prisma from '@/lib/db'
 import { stripe } from '@/lib/stripe'
 import { requireUser } from '@/lib/require-user'
 import { SubmitButton } from '@/components/dashboard/SubmitButtons'
-import { PricingTable } from '@/components/dashboard/Pricing'
 import {
 	Card,
 	CardContent,
@@ -12,6 +11,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@/components/ui/card'
+import { PricingTable } from '@/components/shared/PricingTable'
 
 const getData = async (userId: string) => {
 	const data = await prisma.subscription.findUnique({
